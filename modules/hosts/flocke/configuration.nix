@@ -1,9 +1,9 @@
 { self, inputs, ... }: {
 
-  flake.nixosModules.myMachineConfiguration = { pkgs, lib, ... }: {
+  flake.nixosModules.flockeConfiguration = { pkgs, lib, ... }: {
     # import any other modules from here
     imports = [
-      self.nixosModules.myMachineHardware
+      self.nixosModules.flockeHardware
       self.nixosModules.niri
     ];
 
