@@ -6,15 +6,17 @@
     ../../modules/core.nix
     ../../modules/desktop.nix
   ];
+  networking.hostName = "flocke";
 
+  
   users.users.cier = {
     isNormalUser = true;
     description = "Hauptbenutzer";
     extraGroups = [ "wheel" "networkmanager" "video" ];
   };
   
-  console.keyMap = "de";
-  services.xserver.xkb.layout = "de";
+  console.keyMap = "en";
+  services.xserver.xkb.layout = "en";
   
   # Wichtig für Fonts
   fonts.packages = with pkgs; [
