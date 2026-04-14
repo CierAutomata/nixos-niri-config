@@ -11,6 +11,7 @@
     alacritty
     noctalia-shell
     discord
+    neovim
     nerd-fonts.jetbrains-mono
   ];
 
