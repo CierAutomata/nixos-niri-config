@@ -2,8 +2,8 @@
 
 {
   home.stateVersion = "24.05";
-home.username = "deinName"; # <--- HIER DEINEN USER EINTRAGEN
-  home.homeDirectory = "/home/deinName";
+  home.username = "cier"; # <--- HIER DEINEN USER EINTRAGEN
+  home.homeDirectory = "/home/cier";
 
   # Pakete installieren, aber nicht über Nix konfigurieren
   home.packages = with pkgs; [
