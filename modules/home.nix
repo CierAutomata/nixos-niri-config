@@ -12,6 +12,7 @@
     noctalia-shell
     discord
     neovim
+    gh
     nerd-fonts.jetbrains-mono
   ];
 
@@ -41,6 +42,13 @@
     enable = true;
     userName = "CierAutomata";
     userEmail = "CierAutomata@pm.me";
+    extraConfig = {
+      url = {
+        "git@github.com" = {
+          insteadOf = "https://github.com";
+        };
+      };
+    };
   };
 
 }
