@@ -8,9 +8,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    niri.url = "github:YaLTeR/niri";
-    noctalia.url = "github:TheSudoer/noctalia";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {

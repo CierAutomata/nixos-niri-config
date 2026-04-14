@@ -32,7 +32,7 @@
     defaultEditor = true;
     extraPackages = with pkgs; [
       lua-language-server nil pyright ripgrep fd gcc
-      nodePackages.typescript-language-server
+      typescript-language-server
     ];
   };
 
@@ -78,6 +78,6 @@
 
   home.packages = with pkgs; [
     firefox
-    (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
+    nerd-fonts.jetbrains-mono
   ];
 }

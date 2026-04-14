@@ -2,14 +2,17 @@
 
 {
   programs.niri.enable = true;
-  programs.niri.package = inputs.niri.packages.${pkgs.system}.niri;
 
   environment.systemPackages = [
-    inputs.noctalia.packages.${pkgs.system}.default
     pkgs.discord
+    pkgs.noctalia-shell
     pkgs.wayland-utils
     pkgs.xwayland-satellite # Falls du X11 Apps in Niri brauchst
   ];
+
+  networking.networkmanager.enable = true;
+  hardware.bluetooth.enable = true;
+  services.upower.enable = true;  
 
   xdg.portal = {
     enable = true;

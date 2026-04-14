@@ -12,10 +12,14 @@
     description = "Hauptbenutzer";
     extraGroups = [ "wheel" "networkmanager" "video" ];
   };
-
+  
+  console.keyMap = "de";
+  services.xserver.xkb.layout = "de";
+  
   # Wichtig für Fonts
   fonts.packages = with pkgs; [
-    nerdfonts
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
   ];
 
   system.stateVersion = "24.05";
