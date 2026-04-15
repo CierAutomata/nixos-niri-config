@@ -16,7 +16,10 @@
   };
   
   console.keyMap = "en";
-  services.xserver.xkb.layout = "en";
+  services.xserver.xkb = {
+    layout = "en";
+    variant = "";
+  };
   
   # Wichtig für Fonts
   fonts.packages = with pkgs; [
