@@ -29,18 +29,19 @@
       neededForUsers = true; # Wichtig, wenn es für den Login-User ist
     };
   };
+  
+
   services.udisks2.enable = true; # for USB-Automount
-  services.openssh = {
-  enable = true;
-  settings.PasswordAuthentication = false; # Sicherheit geht vor!
-  # Dies stellt sicher, dass Ed25519 Keys generiert werden (sicherer & kürzer)
-  hostKeys = [
-    {
-      path = "/etc/ssh/ssh_host_ed25519_key";
-      type = "ed25519";
-    }
-  ];
-};
+#  systemd.user.services.udiskie = {
+#    description = "udiskie automounter";
+#    wantedBy = [ "graphical-session.target" ];
+#    partOf = [ "graphical-session.target" ];
+#    serviceConfig = {
+#      ImportAware = true;
+#      ExecStart = "${pkgs.udiskie}/bin/udiskie -f yazi";
+#      Restart = "always" ;
+#    };
+#  };
   
   console.keyMap = "en";
   services.xserver.xkb = {
@@ -52,7 +53,36 @@
     age
     age-plugin-yubikey
     udiskie 
+    xdg-utils
   ];
+  environment.variables = {
+    EDITOR = "nvim";
+    VISUAL = "nvim";
+    SUDO_EDITOR = "nvim";
+    TERMINAL = "alacritty";
+    XDG_TERMINA_EXEC = "alacritty";
+  };
+  xdg = {
+    mime = {
+      enable = true;
+      defaultApplications = {
+        "inode/directory" = [ "yazi.desktop" ];
+      };
+    };
+    portal = {
+      enable = true;
+      extraPortals = [
+        pkgs.xdg-desktop-portal-hyprland
+        pkgs.xdg-desktop-portal-wlr
+        pkgs.xdg-desktop-portal-gtk
+      ];
+      config = {
+        common.default = [ "gtk" ];
+        hyprland.default = [ "hyprland" ];
+        noctalia.default = [ "wlr" ];
+      };
+    };
+  };
   # Wichtig für Fonts
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono

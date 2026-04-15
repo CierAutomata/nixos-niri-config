@@ -13,6 +13,7 @@
     discord
     neovim
     gh
+    #libnotify
     nerd-fonts.jetbrains-mono
   ];
 
@@ -36,6 +37,12 @@
     # Noctalia (den ganzen Ordner verlinken!)
     "noctalia".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/noctalia";
   };
+  
+#  services.mako = {
+#    enable = true;
+#    defaultTimeout = 5000;
+#    backgroundColor = "#1e1e2e";
+#  };
 
   # Git Identität (die bleibt am besten in Nix, da sie sich selten ändert)
   programs.git = {
