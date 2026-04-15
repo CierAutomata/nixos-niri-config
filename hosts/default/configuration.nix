@@ -13,22 +13,20 @@
     isNormalUser = true;
     description = "Hauptbenutzer";
     extraGroups = [ "wheel" "networkmanager" "video" ];
-    #hashedPasswordFile = config.sops.secrets.user-password.path;
+    hashedPasswordFile = config.sops.secrets.user-password.path;
   };
+  users.mutableUsers = false; # Das ist der wichtigste Schalter!
 
   sops = {
     defaultSopsFile = ../../secrets/secrets.yaml; # Pfad zu deiner verschlüsselten Datei
     defaultSopsFormat = "yaml";
 
     age = {
-      # Dies nutzt den SSH-Key des Hosts als Entschlüsselungs-Key
-      sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-      # Wo die age-keys (vom YubiKey/Backup) liegen sollen
-      keyFile = "/var/lib/sops-nix/key.txt"; 
+      keyFile = "/home/cier/.config/sops/age/keys.txt"; 
       generateKey = true;
     };
     secrets.user-password = {
-      #neededForUsers = true; # Wichtig, wenn es für den Login-User ist
+      neededForUsers = true; # Wichtig, wenn es für den Login-User ist
     };
   };
   

@@ -2,17 +2,18 @@
 
 {
   # Hyprland aktivieren
-  programs.hyprland.enable = true;
-  # Optional: XWayland Support (für ältere Apps/Spiele)
-  programs.hyprland.xwayland.enable = true;
-
+  programs.hyprland = {
+  enable = true;
+  xwayland.enable = true;
+  withUWSM = true; 
+  };
   # Greetd Login-Manager (angepasst auf Hyprland)
   services.greetd = {
     enable = true;
     settings = {
       default_session = {
         command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
-        user = "greeter";
+        user = "cier";
       };
     };
   };
