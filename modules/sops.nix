@@ -17,11 +17,9 @@ in
       generateKey = false;
     };
 
-    # sops-nix uses flat secret names. This maps to `users.cier.hashedPassword`
-    # in the YAML structure via the `path` attribute.
+    # sops-nix maps this flat secret name to `user-password` in secrets.yaml
     secrets.user-password = {
       neededForUsers = true;
-      path = "users/cier/hashedPassword";
     };
   };
 
