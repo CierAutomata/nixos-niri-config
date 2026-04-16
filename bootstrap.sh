@@ -23,31 +23,40 @@ KEY_SOURCE=""
 
 find_key_file() {
   local paths=(/run/media/"$USER" /run/media /media/"$USER" /media /mnt)
-  local result
-  local found=0
+  local files=()
 
   for base in "${paths[@]}"; do
     if [ -d "$base" ]; then
       while IFS= read -r -d '' file; do
-        if [ "$found" -ge 1 ]; then
-          echo "$file"
-        else
-          result="$file"
-        fi
-        found=$((found + 1))
+        files+=("$file")
       done < <(find "$base" -maxdepth 3 -type f \( -name 'key.txt' -o -name 'keys.txt' \) -print0 2>/dev/null)
     fi
   done
 
-  if [ "$found" -eq 1 ]; then
-    printf '%s' "$result"
-  elif [ "$found" -gt 1 ]; then
-    echo "Mehrere key/keyS.txt-Dateien gefunden:" >&2
-    find /run/media/"$USER" /run/media /media/"$USER" /media /mnt -maxdepth 3 -type f \( -name 'key.txt' -o -name 'keys.txt' \) 2>/dev/null >&2
-    return 1
-  else
-    return 2
-  fi
+  case "${#files[@]}" in
+    0)
+      return 2
+      ;;
+    1)
+      printf '%s' "${files[0]}"
+      ;;
+    *)
+      echo "Mehrere key/keyS.txt-Dateien gefunden:" >&2
+      local idx=1
+      for file in "${files[@]}"; do
+        echo "  $idx) $file" >&2
+        idx=$((idx + 1))
+      done
+      while true; do
+        read -rp "Wähle die richtige key-Datei [1-$((idx - 1))]: " choice
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -lt "$idx" ]; then
+          printf '%s' "${files[$((choice - 1))]}"
+          return 0
+        fi
+        echo "Ungültige Auswahl."
+      done
+      ;;
+  esac
 }
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
@@ -144,7 +153,7 @@ case "$#" in
   select_host
   ;;
 1)
-  if [ -f "$1" ] || [[ "$1" == */* ]] || [[ "$1" == .* ]] || [[ "$1" == ~* ]] || [[ "$1" == *.txt ]]; then
+  if [ -f "$1" ] || [[ "$1" == */* ]] || [[ "$1" == .* ]] || [[ "$1" == ~* ]] || [[ "$1" == *key.txt ]] || [[ "$1" == *keys.txt ]]; then
     KEY_SOURCE="$1"
   else
     HOST_NAME="$1"
