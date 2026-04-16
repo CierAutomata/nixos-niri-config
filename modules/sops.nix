@@ -23,13 +23,13 @@ in
 
     # Expose the nested `users.cier.hashedPassword` key from
     # secrets/secrets.yaml so the host config can reference it directly.
-    #secrets.users = {
-    #  cier = {
-    #    hashedPassword = {
-    #      neededForUsers = true;
-    #    };
-    #  };
-    #};
+    secrets.users = {
+      cier = {
+        hashedPassword = {
+          neededForUsers = true;
+        };
+      };
+    };
   };
 
   # Note: Make sure the private Age key exists at `keyPath` on the machine
