@@ -7,3 +7,8 @@ Mit dem Bootstrap-Skript kannst du später mehrere Hosts verwalten:
 - `./bootstrap.sh flocke`
 - `./bootstrap.sh milky`
 - `./bootstrap.sh milky /run/media/cier/9CF8-165B/key.txt`
+
+
+## ToDo
+- add Yubikey as primary encryption for secrets
+- switch from externally stored private age key to dynamically generated ssh-dependant keys
