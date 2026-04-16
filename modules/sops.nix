@@ -2,19 +2,23 @@
 let
   # Path where the private age key is expected during activation
   keyPath = "/home/cier/.config/sops/age/keys.txt";
-  keyPresent = builtins.pathExists keyPath;
 in
 {
-  # Only enable sops configuration if the private key is available on the system.
-  # This prevents the activation-phase decryption from failing (which aborts
-  # other activation snippets like creating user symlinks).
-  sops = lib.mkIf keyPresent {
+  # Enable sops configuration unconditionally. The build that evaluates the
+  # flake must provide the private Age key at `keyPath` (see notes below).
+  sops = {
     defaultSopsFile = ../secrets/secrets.yaml;
     defaultSopsFormat = "yaml";
 
     age = {
       keyFile = keyPath;
       generateKey = false;
+    };
+
+    # Backwards-compatible mapping: some hosts expect the older
+    # `secrets.user-password` key. Keep it for compatibility.
+    secrets.user-password = {
+      neededForUsers = true;
     };
 
     # Expose the nested `users.cier.hashedPassword` key from
@@ -28,5 +32,7 @@ in
     };
   };
 
-  # If the key is not present, keep sops unset so activation continues.
+  # Note: Make sure the private Age key exists at `keyPath` on the machine
+  # where you run `nixos-rebuild`/`nixos-install` so sops can decrypt secrets
+  # during evaluation.
 }
