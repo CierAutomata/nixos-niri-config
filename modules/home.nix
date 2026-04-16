@@ -1,7 +1,7 @@
 { pkgs, config, ... }:
 
 let
-  repo = "${config.home.homeDirectory}/repos/nixos-niri-config";
+  repo = "${config.home.homeDirectory}/repos/nixos-config";
   dot = repo + "/dotfiles";
 in
 

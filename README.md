@@ -1,5 +1,5 @@
 # One-Line-Install
-`nix-shell -p git --run "git clone https://github.com/CierAutomata/nixos-niri-config ~/nixos-config && nixos-generate-config --show-hardware-config > ~/nixos-config/hosts/flocke/hardware-gen.nix && sudo nixos-rebuild switch --flake ~/nixos-config#flocke"`
+`nix-shell -p git --run "git clone https://github.com/CierAutomata/nixos-config ~/nixos-config && nixos-generate-config --show-hardware-config > ~/nixos-config/hosts/flocke/hardware-gen.nix && sudo nixos-rebuild switch --flake ~/nixos-config#flocke"`
 
 Mit dem Bootstrap-Skript kannst du später mehrere Hosts verwalten:
 
