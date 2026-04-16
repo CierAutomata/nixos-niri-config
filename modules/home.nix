@@ -19,23 +19,25 @@
 
   # --- OPTION 1: SYMKLINKS ZU DEINEN DOTFILES ---
   
-  # Das hier verknüpft deine echten Dateien im Home-Verzeichnis
-  # Ändere "/home/deinName/nixos-config/..." zu deinem tatsächlichen Pfad!
+  # Das hier verknüpft deine echten Dateien im Home-Verzeichnis.
+  # Die Quellen liegen im Repo und werden mit mkOutOfStoreSymlink verlinkt.
   
   xdg.configFile = {
     # Hyprland
-    "hypr".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/hypr";
-    
-    "../.bashrc".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/.bashrc"; 
+    "hypr".source = config.lib.file.mkOutOfStoreSymlink ./dotfiles/hypr;
 
     # Neovim (den ganzen Ordner verlinken!)
-    "nvim".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/nvim";
-    
+    "nvim".source = config.lib.file.mkOutOfStoreSymlink ./dotfiles/nvim;
+
     # Alacritty
-    "alacritty".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/alacritty";
-    
+    "alacritty".source = config.lib.file.mkOutOfStoreSymlink ./dotfiles/alacritty;
+
     # Noctalia (den ganzen Ordner verlinken!)
-    "noctalia".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/noctalia";
+    "noctalia".source = config.lib.file.mkOutOfStoreSymlink ./dotfiles/noctalia;
+  };
+
+  home.file = {
+    ".bashrc".source = config.lib.file.mkOutOfStoreSymlink ./dotfiles/.bashrc;
   };
   
 #  services.mako = {
