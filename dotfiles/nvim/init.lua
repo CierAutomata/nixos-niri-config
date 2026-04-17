@@ -22,6 +22,7 @@ if not ok then
   return -- Stoppt die Ausführung, wenn lazy noch nicht geladen werden konnte
 end
 vim.pack.add { { src = "https://github.com/catppuccin/nvim", name = "catppuccin"} }
+--vim.pack.add { { src = "https://github.com/rose-pine/neovim", name = "rose-pine"} }
 -- 2. Plugin Setup
 require("lazy").setup({
   -- UI
@@ -81,7 +82,7 @@ require("lazy").setup({
 
 -- 3. Appearance Settings
 vim.cmd.colorscheme "catppuccin"
-
+--vim.cmd "rose-pine"
 -- 4. General Options & Keymaps
 vim.opt.number = true
 vim.opt.relativenumber = true

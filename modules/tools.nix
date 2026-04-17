@@ -8,6 +8,7 @@
     age-plugin-yubikey
     udiskie
     xdg-utils
+    nautilus
   ];
 
   console.keyMap = "en";
