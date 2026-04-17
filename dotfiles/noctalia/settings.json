@@ -25,7 +25,7 @@
         "showIconBackground": false,
         "sortByMostUsed": true,
         "terminalCommand": "alacritty -e",
-        "viewMode": "grid"
+        "viewMode": "list"
     },
     "audio": {
         "mprisBlacklist": [
@@ -170,6 +170,9 @@
                 }
             ],
             "right": [
+                {
+                    "id": "plugin:usb-drive-manager"
+                },
                 {
                     "blacklist": [
                     ],
@@ -641,19 +644,7 @@
             },
             {
                 "enabled": true,
-                "id": "steam"
-            },
-            {
-                "enabled": true,
                 "id": "discord"
-            },
-            {
-                "enabled": true,
-                "id": "hyprland"
-            },
-            {
-                "enabled": true,
-                "id": "spicetify"
             },
             {
                 "enabled": true,
@@ -686,7 +677,7 @@
     },
     "wallpaper": {
         "automationEnabled": false,
-        "directory": "/home/cier/Pictures/Wallpapers",
+        "directory": "/home/briest/Pictures/Wallpapers",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [

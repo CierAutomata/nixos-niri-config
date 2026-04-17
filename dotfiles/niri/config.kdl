@@ -10,7 +10,7 @@ spawn-at-startup "udiskie -f 'alacritty -e yazi'"
 input {
     keyboard {
         xkb {
-            layout "us"
+            layout "de"
         }
     }
 
@@ -22,6 +22,7 @@ input {
     mouse {
         accel-speed 0.0
     }
+    focus-follows-mouse
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────
@@ -55,6 +56,12 @@ layout {
     }
 }
 
+// Outputs
+output "DP-1" {
+    scale 1.5
+    transform "normal"
+    position x=1 y=0
+}
 // Catppuccin Mocha: base als Hintergrund wenn kein Fenster da ist
 environment {
     // GNOME-/GTK-Theme Hint (optional, falls GTK-Apps den Accent übernehmen sollen)
