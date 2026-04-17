@@ -1,23 +1,23 @@
-{ pkgs, config, ... }:
+{ pkgs, config, osConfig, ... }:
 
 let
-  repo = "${config.home.homeDirectory}/nixos-config";
-  dot = repo + "/dotfiles";
+  dot = osConfig.myConfig.configDir + "/dotfiles";
 in
-
 {
   home.stateVersion = "26.05";
-  home.username = "cier"; # <--- HIER DEINEN USER EINTRAGEN
-  home.homeDirectory = "/home/cier";
+  home.username = osConfig.myConfig.userName;
+  home.homeDirectory = "/home/${osConfig.myConfig.userName}";
 
-  # Pakete installieren, aber nicht über Nix konfigurieren
   home.packages = with pkgs; [
-    hyprland
+    neovim
+    gh
     alacritty
     noctalia-shell
     discord
-    neovim
-    gh
+    firefox
+    brave
+    code
+    yazi
     nerd-fonts.jetbrains-mono
   ];
 
@@ -31,19 +31,10 @@ in
   home.file = {
     ".bashrc".source = config.lib.file.mkOutOfStoreSymlink (dot + "/.bashrc");
   };
-  
-  # Git Identität (die bleibt am besten in Nix, da sie sich selten ändert)
+
   programs.git = {
     enable = true;
     userName = "CierAutomata";
     userEmail = "CierAutomata@pm.me";
-    #extraConfig = {
-    #  url = {
-    #    "git@github.com" = {
-    #      insteadOf = "https://github.com";
-    #    };
-    #  };
-    #};
   };
-
 }

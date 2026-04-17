@@ -1,25 +1,20 @@
-{ pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
-{
-  # Hyprland window manager configurations
+lib.mkIf (config.myConfig.wm == "hyprland") {
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
     withUWSM = true;
   };
 
-  # Login manager configured for Hyprland
   services.greetd = {
     enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd 'uwsm start hyprland-uwsm.desktop'";
-        user = "cier";
-      };
+    settings.default_session = {
+      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd 'uwsm start hyprland-uwsm.desktop'";
+      user = config.myConfig.userName;
     };
   };
 
-  # Hyprland-specific packages
   environment.systemPackages = with pkgs; [
     waybar
     hyprpaper
@@ -27,7 +22,6 @@
     rofi
   ];
 
-  # XDG portal configuration for Hyprland
   xdg.portal = {
     enable = true;
     extraPortals = [

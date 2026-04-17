@@ -3,7 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -12,29 +13,12 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
-  outputs = { self, nixpkgs, home-manager, sops-nix, ... }@inputs: let
-    hosts = builtins.attrNames (builtins.readDir ./hosts);
-    hostConfigs = builtins.listToAttrs (map (host: {
-      name = host;
-      value = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/${host}/configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit inputs; };
-            home-manager.users.cier = import ./modules/home.nix;
-          }
-          sops-nix.nixosModules.sops
-        ];
-      };
-    }) hosts);
-  in {
-    nixosConfigurations = hostConfigs;
-  };
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [ ./flake/hosts.nix ];
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+    };
 }

@@ -1,23 +1,15 @@
-{ pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
-  # Universal Wayland Session Manager
-  programs.uwsm.enable = true;
+  # UWSM nur wenn ein WM aktiv ist
+  programs.uwsm.enable = config.myConfig.wm != "none";
 
-  # General system packages for desktop use
+  # Systemweite Grundpakete für Desktop-Nutzung
   environment.systemPackages = with pkgs; [
-    noctalia-shell
-    discord
-    alacritty
     greetd.tuigreet
-    firefox
-    brave
-    code
     yazi
-  ];
+  ] ++ config.myConfig.extraSystemPackages;
 
-  # Bluetooth and power management
   hardware.bluetooth.enable = true;
   services.upower.enable = true;
 }
-

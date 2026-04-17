@@ -1,0 +1,3 @@
+# Dynamisch generiert von bootstrap.sh — nie committen
+hosts/*/hardware-nixos.nix
+hosts/*/hardware-conf.nix
