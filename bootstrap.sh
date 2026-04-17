@@ -139,7 +139,6 @@ create_host_skeleton() {
 }
 EOF
 
-  # Leeren persistent-Placeholder anlegen (wird committet)
   if [ ! -f "$dir/hardware-gen.nix" ]; then
     cat >"$dir/hardware-gen.nix" <<'EOF'
 # Persistente Hardware-Konfiguration — wird committet und bleibt über Neu-Installationen erhalten.
@@ -159,9 +158,21 @@ EOF
 EOF
   fi
 
+  # Placeholder für hardware-nixos.nix — bootstrap.sh überschreibt ihn mit der
+  # echten /etc/nixos/hardware-configuration.nix und schützt ihn via --skip-worktree.
+  if [ ! -f "$dir/hardware-nixos.nix" ]; then
+    cat >"$dir/hardware-nixos.nix" <<'EOF'
+# Placeholder — wird von bootstrap.sh mit /etc/nixos/hardware-configuration.nix
+# überschrieben. `git update-index --skip-worktree` schützt die lokale Version
+# vor `git pull`. Diese Datei nie manuell bearbeiten.
+{ ... }: {}
+EOF
+  fi
+
   echo ""
   echo "✓ Template erstellt: $dir/configuration.nix"
   echo "✓ Persistent-Placeholder: $dir/hardware-gen.nix"
+  echo "✓ Hardware-Placeholder: $dir/hardware-nixos.nix"
   echo "  Bitte configuration.nix vor dem Rebuild prüfen und ggf. anpassen."
 }
 
@@ -259,7 +270,7 @@ HOST_DIR="$REPO_ROOT/hosts/$HOST_NAME"
 HARDWARE_NIXOS="$HOST_DIR/hardware-nixos.nix"
 HARDWARE_CONF="$HOST_DIR/hardware-conf.nix"
 
-if [ ! -f "$HARDWARE_NIXOS" ]; then
+if [ ! -f "$HARDWARE_NIXOS" ] || grep -q '^\{ \.\.\. \}: {}' "$HARDWARE_NIXOS" 2>/dev/null; then
   if [ -f /etc/nixos/hardware-configuration.nix ]; then
     echo ""
     echo "Kopiere /etc/nixos/hardware-configuration.nix → $HARDWARE_NIXOS"
@@ -271,18 +282,18 @@ if [ ! -f "$HARDWARE_NIXOS" ]; then
     echo "Bitte hardware-nixos.nix manuell in $HOST_DIR/ ablegen." >&2
   fi
 else
-  echo "Hinweis: hardware-nixos.nix existiert bereits, wird nicht überschrieben."
+  echo "Hinweis: hardware-nixos.nix existiert bereits (kein Placeholder), wird nicht überschrieben."
 fi
 
 if [ ! -f "$HARDWARE_CONF" ]; then
   cat >"$HARDWARE_CONF" <<'EOF'
-# Automatisch generiert von bootstrap.sh — nicht committen, nicht manuell bearbeiten.
 # Kombiniert die dynamische NixOS hardware-configuration mit der persistenten hardware-gen.
+# Automatisch generiert von bootstrap.sh — nicht manuell bearbeiten.
 { ... }:
 {
   imports = [
-    ./hardware-nixos.nix  # gitignored — auto-generated von nixos-generate-config
-    ./hardware-gen.nix    # committet   — persistente Mounts, custom Hardware
+    ./hardware-nixos.nix
+    ./hardware-gen.nix
   ];
 }
 EOF
@@ -290,6 +301,13 @@ EOF
 else
   echo "Hinweis: hardware-conf.nix existiert bereits, wird nicht überschrieben."
 fi
+
+# hardware-nixos.nix in den git-Index aufnehmen (Nix liest nur git-tracked Dateien)
+# und mit --skip-worktree schützen, damit git-pull sie nie überschreibt.
+HARDWARE_NIXOS_REL="hosts/$HOST_NAME/hardware-nixos.nix"
+HARDWARE_CONF_REL="hosts/$HOST_NAME/hardware-conf.nix"
+git -C "$REPO_ROOT" add "$HARDWARE_NIXOS_REL" "$HARDWARE_CONF_REL" 2>/dev/null || true
+git -C "$REPO_ROOT" update-index --skip-worktree "$HARDWARE_NIXOS_REL" 2>/dev/null || true
 
 # ── age-Key kopieren ──────────────────────────────────────────────────────────
 
