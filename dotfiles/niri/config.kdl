@@ -82,7 +82,6 @@ binds {
     // ── Fensterverwaltung (aus hyprland.conf) ─────────────────────────────────
     Mod+Q       { close-window; }
     Mod+M       { quit; }
-    Mod+Shift+R { reload-config; }
 
     // ── Fokus bewegen ─────────────────────────────────────────────────────────
     Mod+Left  { focus-column-left; }

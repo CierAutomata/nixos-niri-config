@@ -6,11 +6,12 @@ lib.mkIf (config.myConfig.wm == "niri") {
     package = pkgs.niri;
   };
 
-  # Registriert niri-uwsm.desktop — ohne diesen Eintrag findet uwsm den Compositor nicht.
+  # niri-session statt niri: exportiert WAYLAND_DISPLAY in die systemd-Umgebung
+  # und aktiviert graphical-session.target. Ohne das hängt UWSM beim Start.
   programs.uwsm.waylandCompositors.niri = {
     prettyName = "Niri";
     comment = "Niri Wayland Compositor";
-    binPath = "${pkgs.niri}/bin/niri";
+    binPath = "${pkgs.niri}/bin/niri-session";
   };
 
   services.greetd = {
