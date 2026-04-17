@@ -1,0 +1,155 @@
+// ── Niri Config — Catppuccin Mocha ────────────────────────────────────────────
+
+// ── Autostart ─────────────────────────────────────────────────────────────────
+
+spawn-at-startup "qs" "-c" "noctalia-shell"
+spawn-at-startup "sh" "-c" "udiskie -f 'alacritty -e yazi'"
+
+// ── Input ─────────────────────────────────────────────────────────────────────
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+
+    mouse {
+        accel-speed 0.0
+    }
+}
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+layout {
+    gaps 8
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    default-column-width { proportion 0.5; }
+
+    // Catppuccin Mocha: mauve active, overlay0 inactive, red urgent
+    border {
+        width 2
+        active-color   "#cba6f7"
+        inactive-color "#6c7086"
+        urgent-color   "#f38ba8"
+    }
+
+    shadow {
+        on
+        softness 15
+        spread   3
+        offset x=0 y=4
+        color         "#00000066"
+        inactive-color "#00000040"
+    }
+}
+
+// Catppuccin Mocha: base als Hintergrund wenn kein Fenster da ist
+environment {
+    // GNOME-/GTK-Theme Hint (optional, falls GTK-Apps den Accent übernehmen sollen)
+    // GTK_THEME "catppuccin-mocha-mauve-standard+default"
+}
+
+// Abgerundete Ecken für alle Fenster
+window-rule {
+    geometry-corner-radius 10
+    clip-to-geometry true
+}
+
+prefer-no-csd
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// ── Keybinds ──────────────────────────────────────────────────────────────────
+
+binds {
+    // ── Apps (aus hyprland.conf) ──────────────────────────────────────────────
+    Mod+Return { spawn "alacritty"; }
+    Mod+B      { spawn "firefox"; }
+    Mod+Space  { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+
+    // ── Fensterverwaltung (aus hyprland.conf) ─────────────────────────────────
+    Mod+Q       { close-window; }
+    Mod+M       { quit; }
+    Mod+Shift+R { reload-config; }
+
+    // ── Fokus bewegen ─────────────────────────────────────────────────────────
+    Mod+Left  { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Up    { focus-window-up; }
+    Mod+Down  { focus-window-down; }
+    Mod+H     { focus-column-left; }
+    Mod+L     { focus-column-right; }
+    Mod+K     { focus-window-up; }
+    Mod+J     { focus-window-down; }
+
+    // ── Fenster verschieben ───────────────────────────────────────────────────
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+L     { move-column-right; }
+    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+J     { move-window-down; }
+
+    // ── Fenstergröße ─────────────────────────────────────────────────────────
+    Mod+Minus       { set-column-width "-10%"; }
+    Mod+Equal       { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+    Mod+R           { switch-preset-column-width; }
+
+    // ── Vollbild / Maximieren ─────────────────────────────────────────────────
+    Mod+F       { fullscreen-window; }
+    Mod+Shift+F { maximize-column; }
+
+    // ── Workspaces ────────────────────────────────────────────────────────────
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+
+    Mod+Page_Down       { focus-workspace-down; }
+    Mod+Page_Up         { focus-workspace-up; }
+    Mod+Shift+Page_Down { move-column-to-workspace-down; }
+    Mod+Shift+Page_Up   { move-column-to-workspace-up; }
+
+    // ── Screenshot ────────────────────────────────────────────────────────────
+    Print           { screenshot; }
+    Ctrl+Print      { screenshot-screen; }
+    Alt+Print       { screenshot-window; }
+
+    // ── Audio / Helligkeit (Standard-Laptop-Tasten) ───────────────────────────
+    XF86AudioRaiseVolume  allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
+    XF86AudioLowerVolume  allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
+    XF86AudioMute         allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86MonBrightnessUp                          { spawn "brightnessctl" "set" "10%+"; }
+    XF86MonBrightnessDown                        { spawn "brightnessctl" "set" "10%-"; }
+}

@@ -28,7 +28,6 @@ lib.mkIf (config.myConfig.wm == "niri") {
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   environment.systemPackages = with pkgs; [
-    waybar
     swaylock
     swayidle
     rofi

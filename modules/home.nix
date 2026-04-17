@@ -23,6 +23,7 @@ in
 
   xdg.configFile = {
     "hypr".source = config.lib.file.mkOutOfStoreSymlink (dot + "/hypr/");
+    "niri".source = config.lib.file.mkOutOfStoreSymlink (dot + "/niri/");
     "nvim".source = config.lib.file.mkOutOfStoreSymlink (dot + "/nvim/");
     "alacritty".source = config.lib.file.mkOutOfStoreSymlink (dot + "/alacritty/");
     "noctalia".source = config.lib.file.mkOutOfStoreSymlink (dot + "/noctalia/");
