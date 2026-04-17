@@ -19,6 +19,10 @@
     hashedPasswordFile = config.sops.secrets.user-password.path;
   };
 
+  users.users.root = {
+    hashedPasswordFile = config.sops.secrets.root-password.path;
+  };
+
   users.mutableUsers = false;
   system.stateVersion = "26.05";
 }

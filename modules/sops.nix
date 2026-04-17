@@ -14,5 +14,10 @@
       key = "users/${config.myConfig.userName}/hashedPassword";
       neededForUsers = true;
     };
+
+    secrets.root-password = {
+      key = "users/root/hashedPassword";
+      neededForUsers = true;
+    };
   };
 }
