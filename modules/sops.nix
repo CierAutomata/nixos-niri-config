@@ -13,10 +13,10 @@
       generateKey = false;
     };
 
-    secrets.user-password = {
-      key = "users/${config.myConfig.userName}/hashedPassword";
-      neededForUsers = true;
-    };
+#    secrets.user-password = {
+#      key = "users/${config.myConfig.userName}/hashedPassword";
+#      neededForUsers = true;
+#    };
 
     secrets.root-password = {
       key = "users/root/hashedPassword";

@@ -9,6 +9,7 @@
     ssh-to-age
     udiskie
     xdg-utils
+    nautilus
   ];
 
   console.keyMap = "en";

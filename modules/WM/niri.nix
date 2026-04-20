@@ -21,6 +21,7 @@ lib.mkIf (config.myConfig.wm == "niri") {
       user = "greeter";
     };
   };
+  programs.regreet.enable = true;
 
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;

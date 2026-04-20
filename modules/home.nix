@@ -19,6 +19,7 @@ in
     code
     yazi
     nerd-fonts.jetbrains-mono
+    pywalfox-native
   ];
 
   xdg.configFile = {

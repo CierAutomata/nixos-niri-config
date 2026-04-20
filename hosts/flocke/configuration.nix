@@ -4,7 +4,7 @@
   imports = [ ./hardware-conf.nix ];
 
   myConfig = {
-    wm = "hyprland";
+    wm = "niri";
     isLaptop = true;
     userName = "cier";
     # configDir = "/home/cier/nixos-config"; # Standard, nur ändern wenn Repo woanders liegt
@@ -14,7 +14,7 @@
 
   users.users.cier = {
     isNormalUser = true;
-    description = "Hauptbenutzer";
+    description = "CierAutomata";
     extraGroups = [ "wheel" "networkmanager" "disk" "storage" ];
     hashedPasswordFile = config.sops.secrets.user-password.path;
   };

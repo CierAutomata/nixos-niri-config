@@ -10,7 +10,7 @@ spawn-at-startup "udiskie -f 'alacritty -e yazi'"
 input {
     keyboard {
         xkb {
-            layout "us"
+            layout "de"
         }
     }
 
@@ -22,6 +22,7 @@ input {
     mouse {
         accel-speed 0.0
     }
+    focus-follows-mouse
 }
 
 // ── Layout ────────────────────────────────────────────────────────────────────
@@ -39,7 +40,7 @@ layout {
 
     // Catppuccin Mocha: mauve active, overlay0 inactive, red urgent
     border {
-        width 2
+        width 0
         active-color   "#cba6f7"
         inactive-color "#6c7086"
         urgent-color   "#f38ba8"
@@ -55,6 +56,12 @@ layout {
     }
 }
 
+// Outputs
+output "DP-1" {
+    scale 1.5
+    transform "normal"
+    position x=1 y=0
+}
 // Catppuccin Mocha: base als Hintergrund wenn kein Fenster da ist
 environment {
     // GNOME-/GTK-Theme Hint (optional, falls GTK-Apps den Accent übernehmen sollen)
@@ -78,7 +85,8 @@ binds {
     Mod+Return { spawn "alacritty"; }
     Mod+B      { spawn "firefox"; }
     Mod+Space  { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
-
+    Mod+E      {spawn "nautilus"; }
+    //Mod+C      {spawn "alacritty -e nvim";}
     // ── Fensterverwaltung (aus hyprland.conf) ─────────────────────────────────
     Mod+Q       { close-window; }
     Mod+M       { quit; }
@@ -152,3 +160,6 @@ binds {
     XF86MonBrightnessUp                          { spawn "brightnessctl" "set" "10%+"; }
     XF86MonBrightnessDown                        { spawn "brightnessctl" "set" "10%-"; }
 }
+
+include "./noctalia.kdl"
+
