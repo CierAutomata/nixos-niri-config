@@ -60,9 +60,6 @@ if [ "$_TOOLS_MISSING" = true ]; then
     --command bash "$0" "$@"
 fi
 
-HOST_NAME=""
-KEY_SOURCE=""
-
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 
 # Sucht key.txt / keys.txt auf USB-Mounts und gibt den Pfad aus (leer = nicht gefunden).
@@ -162,12 +159,7 @@ setup_ssh_age_key() {
   fi
 
   local age_pubkey
-  if command -v ssh-to-age >/dev/null 2>&1; then
-    age_pubkey=$(ssh-to-age < "$ssh_pub" 2>/dev/null)
-  else
-    echo "ssh-to-age nicht gefunden, nutze nix run..."
-    age_pubkey=$(nix run nixpkgs#ssh-to-age -- < "$ssh_pub" 2>/dev/null)
-  fi
+  age_pubkey=$(ssh-to-age < "$ssh_pub" 2>/dev/null)
 
   if [ -z "$age_pubkey" ]; then
     echo "Fehler: SSH-Key-Konvertierung fehlgeschlagen." >&2
@@ -302,24 +294,8 @@ list_hosts() {
   done
 }
 
-read_new_host() {
-  while true; do
-    read -rp "Name des neuen Hosts: " host
-    [ -z "$host" ] && { echo "Bitte einen Hostnamen eingeben."; continue; }
-    [ -d "$REPO_ROOT/hosts/$host" ] && { echo "Host '$host' existiert bereits."; continue; }
-    HOST_NAME="$host"
-    create_host_skeleton "$HOST_NAME"
-    return
-  done
-}
-
 select_host() {
   mapfile -t hosts < <(list_hosts || true)
-
-  if [ "${#hosts[@]}" -eq 0 ]; then
-    echo "Keine Hosts in hosts/ gefunden — lege einen neuen an."
-    read_new_host; return
-  fi
 
   echo ""
   echo "Welchen Host möchtest du installieren?"
@@ -335,7 +311,13 @@ select_host() {
     read -rp "Auswahl [0-$((i-1))]: " choice
     case "$choice" in
       0) echo "Abgebrochen."; exit 0 ;;
-      1) read_new_host; return ;;
+      1)
+        while true; do
+          read -rp "Name des neuen Hosts: " host
+          [ -z "$host" ] && { echo "Bitte einen Hostnamen eingeben."; continue; }
+          [ -d "$REPO_ROOT/hosts/$host" ] && { echo "Host '$host' existiert bereits."; continue; }
+          HOST_NAME="$host"; create_host_skeleton "$HOST_NAME"; return
+        done ;;
       ''|*[!0-9]*) echo "Bitte eine Zahl eingeben." ;;
       *)
         if [ "$choice" -ge 2 ] && [ "$choice" -lt "$i" ]; then
@@ -348,74 +330,19 @@ select_host() {
 
 # ── Argumente ─────────────────────────────────────────────────────────────────
 
-case "$#" in
-  0)
-    select_host
-    ;;
-  1)
-    HOST_NAME="$1"
-    if [ ! -d "$REPO_ROOT/hosts/$HOST_NAME" ]; then
-      read -rp "Host '$HOST_NAME' existiert nicht. Neuen Host anlegen? [y/N]: " confirm
-      case "${confirm:-N}" in
-        [yY]|[yY][eE][sS]) create_host_skeleton "$HOST_NAME" ;;
-        *) echo "Abgebrochen."; exit 0 ;;
-      esac
-    fi
-    ;;
-  2)
-    HOST_NAME="$1"
-    KEY_SOURCE="$2"
-    if [ ! -d "$REPO_ROOT/hosts/$HOST_NAME" ]; then
-      read -rp "Host '$HOST_NAME' existiert nicht. Neuen Host anlegen? [y/N]: " confirm
-      case "${confirm:-N}" in
-        [yY]|[yY][eE][sS]) create_host_skeleton "$HOST_NAME" ;;
-        *) echo "Abgebrochen."; exit 0 ;;
-      esac
-    fi
-    ;;
-  *)
-    usage
-    ;;
-esac
+[ "$#" -gt 2 ] && usage
 
-# ── Hardware-Dateien prüfen ───────────────────────────────────────────────────
-#
-# Neue Struktur (2 Dateien, beide committed):
-#   hardware.nix       — importiert /etc/nixos/hardware-configuration.nix + hardware-extra.nix
-#   hardware-extra.nix — persistente Einstellungen (Mounts etc.)
-#
-# Sicherheitsbereinigung: veraltete Dateien aus früheren bootstrap-Versionen entfernen.
+HOST_NAME="${1:-}"
+KEY_SOURCE="${2:-}"
 
-HOST_DIR="$REPO_ROOT/hosts/$HOST_NAME"
-
-echo ""
-
-# Veraltete Dateien aus git-Tracking entfernen falls noch vorhanden
-for old_file in "hosts/$HOST_NAME/hardware-nixos.nix" "hosts/$HOST_NAME/hardware-conf.nix" "hosts/$HOST_NAME/hardware-gen.nix"; do
-  if git -C "$REPO_ROOT" ls-files --error-unmatch "$old_file" >/dev/null 2>&1; then
-    echo "Bereinigung: $old_file aus git-Tracking entfernt..."
-    git -C "$REPO_ROOT" rm -f "$old_file"
-    _cleanup_needed=true
-  fi
-done
-if [ "${_cleanup_needed:-false}" = true ]; then
-  git -C "$REPO_ROOT" commit -m "bootstrap: veraltete Hardware-Dateien aus Repository entfernt"
-fi
-
-# hardware.nix anlegen falls nicht vorhanden (bei bestehenden Hosts nach Umbenennung)
-if [ ! -f "$HOST_DIR/hardware.nix" ]; then
-  cat >"$HOST_DIR/hardware.nix" <<'EOF'
-{ ... }:
-{
-  imports = [
-    /etc/nixos/hardware-configuration.nix
-    ./hardware-extra.nix
-  ];
-}
-EOF
-  git -C "$REPO_ROOT" add "hosts/$HOST_NAME/hardware.nix"
-  git -C "$REPO_ROOT" commit -m "bootstrap: hardware.nix für $HOST_NAME angelegt"
-  echo "✓ hardware.nix angelegt."
+if [ -z "$HOST_NAME" ]; then
+  select_host
+elif [ ! -d "$REPO_ROOT/hosts/$HOST_NAME" ]; then
+  read -rp "Host '$HOST_NAME' existiert nicht. Neuen Host anlegen? [y/N]: " confirm
+  case "${confirm:-N}" in
+    [yY]|[yY][eE][sS]) create_host_skeleton "$HOST_NAME" ;;
+    *) echo "Abgebrochen."; exit 0 ;;
+  esac
 fi
 
 if [ ! -f /etc/nixos/hardware-configuration.nix ]; then

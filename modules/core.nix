@@ -2,6 +2,17 @@
 
 {
   networking.networkmanager.enable = true;
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
+    hostKeys = [
+      { type = "ed25519"; path = "/etc/ssh/ssh_host_ed25519_key"; }
+    ];
+  };
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "de_DE.UTF-8";
 
