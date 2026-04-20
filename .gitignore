@@ -1,3 +1,1 @@
-# hardware-nixos.nix wird von bootstrap.sh mit der echten hardware-configuration
-# überschrieben und per `git update-index --skip-worktree` vor git-pull geschützt.
-# hardware-conf.nix ist ein statischer Kombinierer und wird committed.
+

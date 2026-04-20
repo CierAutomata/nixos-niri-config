@@ -233,9 +233,7 @@ create_host_skeleton() {
 { config, pkgs, lib, ... }:
 
 {
-  # hardware-conf.nix wird von bootstrap.sh generiert (gitignored).
-  # Sie kombiniert hardware-nixos.nix (NixOS auto-generated) + hardware-gen.nix (persistent).
-  imports = [ ./hardware-conf.nix ];
+  imports = [ ./hardware.nix ];
 
   myConfig = {
     wm = "$wm";
@@ -257,10 +255,21 @@ create_host_skeleton() {
 }
 EOF
 
-  if [ ! -f "$dir/hardware-gen.nix" ]; then
-    cat >"$dir/hardware-gen.nix" <<'EOF'
-# Persistente Hardware-Konfiguration — wird committet und bleibt über Neu-Installationen erhalten.
-# Hier kommen Dinge rein die nixos-generate-config NICHT erkennt:
+  cat >"$dir/hardware.nix" <<'EOF'
+{ ... }:
+{
+  imports = [
+    /etc/nixos/hardware-configuration.nix
+    ./hardware-extra.nix
+  ];
+}
+EOF
+
+  cat >"$dir/hardware-extra.nix" <<EOF
+# Persistente Hardware-Konfiguration für $host.
+# Wird committet und bleibt über Neuinstallationen erhalten.
+#
+# Hier kommen Dinge rein, die nixos-generate-config NICHT automatisch erkennt:
 #   - Persistente Datenmounts (externe Festplatten, NAS, etc.)
 #   - Zusätzliche Swap-Partitionen
 #   - Hardware-spezifische Kernel-Parameter
@@ -268,29 +277,20 @@ EOF
 
 {
   # fileSystems."/data" = {
-  #   device = "/dev/disk/by-label/data";
+  #   device = "/dev/disk/by-label/$host-data";
   #   fsType = "ext4";
   #   options = [ "defaults" "nofail" ];
   # };
 }
 EOF
-  fi
 
-  # Placeholder für hardware-nixos.nix — bootstrap.sh überschreibt ihn mit der
-  # echten /etc/nixos/hardware-configuration.nix und schützt ihn via --skip-worktree.
-  if [ ! -f "$dir/hardware-nixos.nix" ]; then
-    cat >"$dir/hardware-nixos.nix" <<'EOF'
-# Placeholder — wird von bootstrap.sh mit /etc/nixos/hardware-configuration.nix
-# überschrieben. `git update-index --skip-worktree` schützt die lokale Version
-# vor `git pull`. Diese Datei nie manuell bearbeiten.
-{ ... }: {}
-EOF
-  fi
+  git -C "$REPO_ROOT" add "$dir/configuration.nix" "$dir/hardware.nix" "$dir/hardware-extra.nix"
+  git -C "$REPO_ROOT" commit -m "bootstrap: Host '$host' angelegt"
 
   echo ""
-  echo "✓ Template erstellt: $dir/configuration.nix"
-  echo "✓ Persistent-Placeholder: $dir/hardware-gen.nix"
-  echo "✓ Hardware-Placeholder: $dir/hardware-nixos.nix"
+  echo "✓ $dir/configuration.nix"
+  echo "✓ $dir/hardware.nix       (importiert /etc/nixos/hardware-configuration.nix)"
+  echo "✓ $dir/hardware-extra.nix (persistente Einstellungen — hier Mounts eintragen)"
   echo "  Bitte configuration.nix vor dem Rebuild prüfen und ggf. anpassen."
 }
 
@@ -378,54 +378,51 @@ case "$#" in
     ;;
 esac
 
-# ── Hardware-Config generieren ────────────────────────────────────────────────
+# ── Hardware-Dateien prüfen ───────────────────────────────────────────────────
 #
-# Ziel-Dateien (beide gitignored, werden nie von git pull überschrieben):
-#   hardware-nixos.nix  — Kopie von /etc/nixos/hardware-configuration.nix
-#   hardware-conf.nix   — importiert hardware-nixos.nix + hardware-gen.nix
+# Neue Struktur (2 Dateien, beide committed):
+#   hardware.nix       — importiert /etc/nixos/hardware-configuration.nix + hardware-extra.nix
+#   hardware-extra.nix — persistente Einstellungen (Mounts etc.)
+#
+# Sicherheitsbereinigung: veraltete Dateien aus früheren bootstrap-Versionen entfernen.
 
 HOST_DIR="$REPO_ROOT/hosts/$HOST_NAME"
-HARDWARE_NIXOS="$HOST_DIR/hardware-nixos.nix"
-HARDWARE_CONF="$HOST_DIR/hardware-conf.nix"
 
-if [ ! -f "$HARDWARE_NIXOS" ] || grep -q '^\{ \.\.\. \}: {}' "$HARDWARE_NIXOS" 2>/dev/null; then
-  if [ -f /etc/nixos/hardware-configuration.nix ]; then
-    echo ""
-    echo "Kopiere /etc/nixos/hardware-configuration.nix → $HARDWARE_NIXOS"
-    sudo cp /etc/nixos/hardware-configuration.nix "$HARDWARE_NIXOS"
-    sudo chown "$(id -u)":"$(id -g)" "$HARDWARE_NIXOS"
-  else
-    echo "" >&2
-    echo "Warnung: /etc/nixos/hardware-configuration.nix nicht gefunden." >&2
-    echo "Bitte hardware-nixos.nix manuell in $HOST_DIR/ ablegen." >&2
+echo ""
+
+# Veraltete Dateien aus git-Tracking entfernen falls noch vorhanden
+for old_file in "hosts/$HOST_NAME/hardware-nixos.nix" "hosts/$HOST_NAME/hardware-conf.nix" "hosts/$HOST_NAME/hardware-gen.nix"; do
+  if git -C "$REPO_ROOT" ls-files --error-unmatch "$old_file" >/dev/null 2>&1; then
+    echo "Bereinigung: $old_file aus git-Tracking entfernt..."
+    git -C "$REPO_ROOT" rm -f "$old_file"
+    _cleanup_needed=true
   fi
-else
-  echo "Hinweis: hardware-nixos.nix existiert bereits (kein Placeholder), wird nicht überschrieben."
+done
+if [ "${_cleanup_needed:-false}" = true ]; then
+  git -C "$REPO_ROOT" commit -m "bootstrap: veraltete Hardware-Dateien aus Repository entfernt"
 fi
 
-if [ ! -f "$HARDWARE_CONF" ]; then
-  cat >"$HARDWARE_CONF" <<'EOF'
-# Kombiniert die dynamische NixOS hardware-configuration mit der persistenten hardware-gen.
-# Automatisch generiert von bootstrap.sh — nicht manuell bearbeiten.
+# hardware.nix anlegen falls nicht vorhanden (bei bestehenden Hosts nach Umbenennung)
+if [ ! -f "$HOST_DIR/hardware.nix" ]; then
+  cat >"$HOST_DIR/hardware.nix" <<'EOF'
 { ... }:
 {
   imports = [
-    ./hardware-nixos.nix
-    ./hardware-gen.nix
+    /etc/nixos/hardware-configuration.nix
+    ./hardware-extra.nix
   ];
 }
 EOF
-  echo "hardware-conf.nix generiert: $HARDWARE_CONF"
-else
-  echo "Hinweis: hardware-conf.nix existiert bereits, wird nicht überschrieben."
+  git -C "$REPO_ROOT" add "hosts/$HOST_NAME/hardware.nix"
+  git -C "$REPO_ROOT" commit -m "bootstrap: hardware.nix für $HOST_NAME angelegt"
+  echo "✓ hardware.nix angelegt."
 fi
 
-# hardware-nixos.nix in den git-Index aufnehmen (Nix liest nur git-tracked Dateien)
-# und mit --skip-worktree schützen, damit git-pull sie nie überschreibt.
-HARDWARE_NIXOS_REL="hosts/$HOST_NAME/hardware-nixos.nix"
-HARDWARE_CONF_REL="hosts/$HOST_NAME/hardware-conf.nix"
-git -C "$REPO_ROOT" add "$HARDWARE_NIXOS_REL" "$HARDWARE_CONF_REL" 2>/dev/null || true
-git -C "$REPO_ROOT" update-index --skip-worktree "$HARDWARE_NIXOS_REL" 2>/dev/null || true
+if [ ! -f /etc/nixos/hardware-configuration.nix ]; then
+  echo "" >&2
+  echo "Warnung: /etc/nixos/hardware-configuration.nix nicht gefunden." >&2
+  echo "Sicherstellen dass nixos-generate-config ausgeführt wurde." >&2
+fi
 
 # ── Schlüssel-Setup ───────────────────────────────────────────────────────────
 #

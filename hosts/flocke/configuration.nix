@@ -1,7 +1,7 @@
 { config, pkgs, lib,  ... }:
 
 {
-  imports = [ ./hardware-conf.nix ];
+  imports = [ ./hardware.nix ];
 
   myConfig = {
     wm = "niri";
