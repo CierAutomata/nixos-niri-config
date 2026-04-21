@@ -57,18 +57,8 @@ if [ "$_TOOLS_MISSING" = true ]; then
     nixpkgs#age \
     nixpkgs#age-plugin-yubikey \
     nixpkgs#ssh-to-age \
-    nixpkgs#pcsclite \
-    nixpkgs#ccid \
-    nixpkgs#yubikey-manager \
     --command bash "$0" "$@"
 fi
-
-# ── pcscd-Cleanup bei Skriptende ──────────────────────────────────────────────
-_PCSCD_STARTED_BY_BOOTSTRAP=false
-cleanup() {
-  [ "$_PCSCD_STARTED_BY_BOOTSTRAP" = true ] && pkill pcscd 2>/dev/null || true
-}
-trap cleanup EXIT
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 
@@ -123,65 +113,25 @@ append_age_key_to_sops() {
   ' "$sops_yaml" > "${sops_yaml}.tmp" && mv "${sops_yaml}.tmp" "$sops_yaml"
 }
 
-# Startet pcscd falls noch nicht laufend — benötigt damit age-plugin-yubikey
-# mit dem YubiKey kommunizieren kann.
-start_pcscd_if_needed() {
-  pgrep -x pcscd > /dev/null 2>&1 && return 0
-
-  echo "Starte pcscd für YubiKey-Kommunikation..."
-
-  # ccid-Treiber verknüpfen damit pcscd den YubiKey erkennt
-  local ccid_store
-  ccid_store=$(nix --extra-experimental-features 'nix-command flakes' \
-    path-info 'nixpkgs#ccid' 2>/dev/null) || ccid_store=""
-  if [ -n "$ccid_store" ] && [ -d "$ccid_store/pcsc/drivers" ]; then
-    mkdir -p /var/lib/pcsc
-    ln -sfn "$ccid_store/pcsc/drivers" /var/lib/pcsc/drivers
-  fi
-
-  pcscd 2>/dev/null || sudo pcscd 2>/dev/null || {
-    echo "Warnung: pcscd konnte nicht gestartet werden — YubiKey-Setup übersprungen." >&2
-    return 1
-  }
-  sleep 1
-  _PCSCD_STARTED_BY_BOOTSTRAP=true
-  echo "✓ pcscd gestartet."
-}
-
-# Erkennt YubiKey, generiert Identity-Datei, trägt Empfänger in .sops.yaml ein.
-# Gibt 0 zurück wenn ein Key neu hinzugefügt wurde, 1 sonst.
+# Liest YubiKey-Identity aus (setzt voraus dass pcscd läuft) und trägt
+# Empfänger in .sops.yaml ein. Gibt 0 zurück wenn etwas geändert wurde.
 detect_and_add_yubikey() {
   local sops_yaml="$REPO_ROOT/.sops.yaml"
 
   command -v age-plugin-yubikey >/dev/null 2>&1 || return 1
 
-  start_pcscd_if_needed || return 1
-
   local yubikey_recipient
   yubikey_recipient=$(age-plugin-yubikey --list 2>/dev/null | grep -E '^age1yubikey1' | head -1)
 
   if [ -z "$yubikey_recipient" ]; then
-    echo "Kein age-Schlüssel auf YubiKey gefunden."
-    read -rp "YubiKey jetzt einrichten? (interaktiver Assistent) [y/N]: " yn
-    case "${yn:-N}" in
-      [yY]|[yY][eE][sS])
-        echo "Hinweis: Falls der Assistent fehlschlägt, ggf. zuerst ausführen:"
-        echo "  ykman piv access change-management-key -a TDES --protect"
-        age-plugin-yubikey
-        yubikey_recipient=$(age-plugin-yubikey --list 2>/dev/null | grep -E '^age1yubikey1' | head -1)
-        ;;
-      *) return 1 ;;
-    esac
-  fi
-
-  if [ -z "$yubikey_recipient" ]; then
-    echo "Warnung: Kein YubiKey-Empfänger ermittelt." >&2
+    echo "Hinweis: Kein YubiKey mit age-Key gefunden (pcscd läuft? YubiKey eingesteckt?)."
+    echo "  → bootstrap.sh nach erstem Rebuild erneut ausführen um YubiKey einzurichten."
     return 1
   fi
 
   echo "YubiKey erkannt: $yubikey_recipient"
 
-  # Identity-Datei für manuelle sops-Nutzung (~/.config/sops/age/keys.txt) speichern
+  # Identity in keys.txt speichern damit sops den YubiKey zur Entschlüsselung nutzen kann
   mkdir -p "$HOME/.config/sops/age"
   local keys_file="$HOME/.config/sops/age/keys.txt"
   if ! grep -qF 'AGE-PLUGIN-YUBIKEY' "$keys_file" 2>/dev/null; then
