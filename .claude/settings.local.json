@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"https://api.github.com/repos/Mic92/sops-nix/issues/comments/2926579189\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('body','not found'\\)\\)\")"
     ]
   }
 }

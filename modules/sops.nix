@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   sops = {
@@ -6,13 +6,11 @@
     defaultSopsFormat = "yaml";
 
     age = {
-      # Primär: SSH-Host-Key (von bootstrap.sh als SOPS-Empfänger registriert)
-      sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-      # Fallback: alter Key-File (Übergangslösung, kann entfernt werden sobald SSH-Key aktiv ist)
+      sshKeyPaths = [];
       keyFile = "/home/${config.myConfig.userName}/.config/sops/age/keys.txt";
       generateKey = false;
     };
-    
+
     secrets.user-password = {
       key = "users/${config.myConfig.userName}/hashedPassword";
       neededForUsers = true;
@@ -23,4 +21,19 @@
       neededForUsers = true;
     };
   };
+
+  # pcscd während der Aktivierung starten damit age-plugin-yubikey
+  # den YubiKey für die Entschlüsselung nutzen kann (falls eingesteckt).
+  # Läuft alphabetisch vor setupSecrets / setupSecretsForUsers.
+  system.activationScripts.setupYubikeyForSopsNix = {
+    text = ''
+      PATH=$PATH:${lib.makeBinPath [ pkgs.age-plugin-yubikey ]}
+      mkdir -p /var/lib/pcsc
+      ln -sfn ${pkgs.ccid}/pcsc/drivers /var/lib/pcsc/drivers
+      ${pkgs.procps}/bin/pkill pcscd 2>/dev/null || true
+      ${pkgs.pcsclite}/bin/pcscd
+    '';
+  };
+  system.activationScripts.setupSecrets.deps        = [ "setupYubikeyForSopsNix" ];
+  system.activationScripts.setupSecretsForUsers.deps = [ "setupYubikeyForSopsNix" ];
 }

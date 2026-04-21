@@ -57,8 +57,18 @@ if [ "$_TOOLS_MISSING" = true ]; then
     nixpkgs#age \
     nixpkgs#age-plugin-yubikey \
     nixpkgs#ssh-to-age \
+    nixpkgs#pcsclite \
+    nixpkgs#ccid \
+    nixpkgs#yubikey-manager \
     --command bash "$0" "$@"
 fi
+
+# ── pcscd-Cleanup bei Skriptende ──────────────────────────────────────────────
+_PCSCD_STARTED_BY_BOOTSTRAP=false
+cleanup() {
+  [ "$_PCSCD_STARTED_BY_BOOTSTRAP" = true ] && pkill pcscd 2>/dev/null || true
+}
+trap cleanup EXIT
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 
@@ -113,35 +123,85 @@ append_age_key_to_sops() {
   ' "$sops_yaml" > "${sops_yaml}.tmp" && mv "${sops_yaml}.tmp" "$sops_yaml"
 }
 
-# Versucht den YubiKey-age-Public-Key via age-plugin-yubikey zu ermitteln
-# und trägt ihn in .sops.yaml ein, falls noch nicht vorhanden.
-# Gibt 0 zurück wenn ein Key hinzugefügt wurde, 1 sonst.
+# Startet pcscd falls noch nicht laufend — benötigt damit age-plugin-yubikey
+# mit dem YubiKey kommunizieren kann.
+start_pcscd_if_needed() {
+  pgrep -x pcscd > /dev/null 2>&1 && return 0
+
+  echo "Starte pcscd für YubiKey-Kommunikation..."
+
+  # ccid-Treiber verknüpfen damit pcscd den YubiKey erkennt
+  local ccid_store
+  ccid_store=$(nix --extra-experimental-features 'nix-command flakes' \
+    path-info 'nixpkgs#ccid' 2>/dev/null) || ccid_store=""
+  if [ -n "$ccid_store" ] && [ -d "$ccid_store/pcsc/drivers" ]; then
+    mkdir -p /var/lib/pcsc
+    ln -sfn "$ccid_store/pcsc/drivers" /var/lib/pcsc/drivers
+  fi
+
+  pcscd 2>/dev/null || sudo pcscd 2>/dev/null || {
+    echo "Warnung: pcscd konnte nicht gestartet werden — YubiKey-Setup übersprungen." >&2
+    return 1
+  }
+  sleep 1
+  _PCSCD_STARTED_BY_BOOTSTRAP=true
+  echo "✓ pcscd gestartet."
+}
+
+# Erkennt YubiKey, generiert Identity-Datei, trägt Empfänger in .sops.yaml ein.
+# Gibt 0 zurück wenn ein Key neu hinzugefügt wurde, 1 sonst.
 detect_and_add_yubikey() {
   local sops_yaml="$REPO_ROOT/.sops.yaml"
 
-  if ! command -v age-plugin-yubikey >/dev/null 2>&1; then
+  command -v age-plugin-yubikey >/dev/null 2>&1 || return 1
+
+  start_pcscd_if_needed || return 1
+
+  local yubikey_recipient
+  yubikey_recipient=$(age-plugin-yubikey --list 2>/dev/null | grep -E '^age1yubikey1' | head -1)
+
+  if [ -z "$yubikey_recipient" ]; then
+    echo "Kein age-Schlüssel auf YubiKey gefunden."
+    read -rp "YubiKey jetzt einrichten? (interaktiver Assistent) [y/N]: " yn
+    case "${yn:-N}" in
+      [yY]|[yY][eE][sS])
+        echo "Hinweis: Falls der Assistent fehlschlägt, ggf. zuerst ausführen:"
+        echo "  ykman piv access change-management-key -a TDES --protect"
+        age-plugin-yubikey
+        yubikey_recipient=$(age-plugin-yubikey --list 2>/dev/null | grep -E '^age1yubikey1' | head -1)
+        ;;
+      *) return 1 ;;
+    esac
+  fi
+
+  if [ -z "$yubikey_recipient" ]; then
+    echo "Warnung: Kein YubiKey-Empfänger ermittelt." >&2
     return 1
   fi
 
-  local yubikey_key
-  yubikey_key=$(age-plugin-yubikey --list 2>/dev/null | grep -E '^age1yubikey1' | head -1)
+  echo "YubiKey erkannt: $yubikey_recipient"
 
-  if [ -z "$yubikey_key" ]; then
-    return 1
+  # Identity-Datei für manuelle sops-Nutzung (~/.config/sops/age/keys.txt) speichern
+  mkdir -p "$HOME/.config/sops/age"
+  local keys_file="$HOME/.config/sops/age/keys.txt"
+  if ! grep -qF 'AGE-PLUGIN-YUBIKEY' "$keys_file" 2>/dev/null; then
+    age-plugin-yubikey --identity 2>/dev/null >> "$keys_file"
+    echo "✓ YubiKey-Identity → ~/.config/sops/age/keys.txt gespeichert."
+  else
+    echo "✓ YubiKey-Identity bereits in keys.txt vorhanden."
   fi
 
-  if grep -qF "$yubikey_key" "$sops_yaml"; then
+  # Empfänger in .sops.yaml eintragen
+  if grep -qF "$yubikey_recipient" "$sops_yaml"; then
     echo "✓ YubiKey bereits in .sops.yaml eingetragen."
     return 1
   fi
 
-  echo "YubiKey erkannt: $yubikey_key"
   echo "Trage YubiKey in .sops.yaml ein..."
-  # Unkommentiere und ersetze die Vorlage-Zeile falls vorhanden, sonst anhängen
   if grep -q '# - age1yubikey1EINTRAGEN' "$sops_yaml"; then
-    sed -i "s|# - age1yubikey1EINTRAGEN|        - ${yubikey_key}  # yubikey|" "$sops_yaml"
+    sed -i "s|# - age1yubikey1EINTRAGEN|        - ${yubikey_recipient}  # yubikey|" "$sops_yaml"
   else
-    append_age_key_to_sops "$yubikey_key" "yubikey"
+    append_age_key_to_sops "$yubikey_recipient" "yubikey"
   fi
   return 0
 }
