@@ -13,13 +13,17 @@ in
     gh
     alacritty
     noctalia-shell
-    discord
     firefox
     brave
     code
     yazi
     nerd-fonts.jetbrains-mono
     pywalfox-native
+    vscode
+    brave
+    vesktop
+    spotify
+    
   ];
 
   xdg.configFile = {
