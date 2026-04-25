@@ -12,7 +12,7 @@ lib.mkIf (config.myConfig.wm == "hyprland") {
     enable = true;
     # Optional: Enable Wayland support in SDDM
     wayland = {
-      enable = true;
+      enable = false;
     };
     #theme = "breeze"; # Optional: Set SDDM theme
   };
