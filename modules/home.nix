@@ -35,9 +35,9 @@ in
     dracula-theme
     kdePackages.breeze-gtk
     kdePackages.breeze-icons
-    steam
     remmina
     freerdp
+    nwg-displays
   ];
 
   xdg.configFile = {
@@ -54,7 +54,6 @@ in
   home.file = {
     ".bashrc".source = config.lib.file.mkOutOfStoreSymlink (dot + "/.bashrc");
   };
-
   programs.git = {
     enable = true;
     userName = "CierAutomata";

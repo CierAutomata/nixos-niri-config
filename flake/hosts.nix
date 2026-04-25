@@ -17,6 +17,7 @@ let
     ../modules/WM/hyprland.nix
     ../modules/WM/niri.nix
     #../modules/sops.nix
+    ../modules/silent-sddm.nix
   ];
 in
 {
