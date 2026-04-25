@@ -25,15 +25,16 @@
   };
 
   #users.users.root = {
-    #hashedPasswordFile = config.sops.secrets.root-password.path;
+  #  hashedPasswordFile = config.sops.secrets.root-password.path;
   #};
 
   #users.mutableUsers = false;
   system.stateVersion = "26.05";
+  hardware.bluetooth.enable = true;
 
   console.keyMap = "en";
   services.xserver.xkb = {
-    layout = "en";
+    layout = "us";
     variant = "";
   };
 }

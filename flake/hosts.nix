@@ -16,7 +16,7 @@ let
     ../modules/laptop.nix
     ../modules/WM/hyprland.nix
     ../modules/WM/niri.nix
-    ../modules/sops.nix
+    #../modules/sops.nix
   ];
 in
 {

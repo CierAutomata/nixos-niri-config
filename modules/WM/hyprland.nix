@@ -16,7 +16,7 @@ lib.mkIf (config.myConfig.wm == "hyprland") {
     };
     #theme = "breeze"; # Optional: Set SDDM theme
   };
-
+  services.xserver.enable = true;
   environment.systemPackages = with pkgs; [
     waybar
     hyprpaper
