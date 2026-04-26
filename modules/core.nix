@@ -15,6 +15,7 @@
 #  };
 
   services.pcscd.enable = true;
+  time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "de_DE.UTF-8";
 
   environment.systemPackages = with pkgs; [

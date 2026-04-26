@@ -1,0 +1,16 @@
+window-rule {
+    geometry-corner-radius 10
+    clip-to-geometry true
+}
+
+// Brave: keine Transparenz
+window-rule {
+    match app-id="brave-browser"
+    opacity 1.0
+}
+
+// Steam-Spiele auf Gaming-Workspace
+window-rule {
+    match app-id=r#"steam_app_.*"#
+    open-on-workspace "gaming"
+}

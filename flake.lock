@@ -90,8 +90,25 @@
         "home-manager": "home-manager",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
+        "rose-pine-grub": "rose-pine-grub",
         "silentSDDM": "silentSDDM",
         "sops-nix": "sops-nix"
+      }
+    },
+    "rose-pine-grub": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1762352812,
+        "narHash": "sha256-QIhqvB6EGHLtNeKapoul3RQ14dzzlLgFH2HUSXRMRFg=",
+        "owner": "rose-pine",
+        "repo": "grub",
+        "rev": "4255654cd7cd7766a1747c5e01553efc528ba3d1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rose-pine",
+        "repo": "grub",
+        "type": "github"
       }
     },
     "silentSDDM": {

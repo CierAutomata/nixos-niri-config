@@ -6,34 +6,45 @@ lib.mkIf (config.myConfig.wm == "niri") {
     package = pkgs.niri;
   };
 
-  # niri-session statt niri: exportiert WAYLAND_DISPLAY in die systemd-Umgebung
-  # und aktiviert graphical-session.target. Ohne das hängt UWSM beim Start.
+  # niri-session exportiert WAYLAND_DISPLAY in die systemd-Umgebung
+  # und aktiviert graphical-session.target — notwendig für UWSM
   programs.uwsm.waylandCompositors.niri = {
     prettyName = "Niri";
     comment = "Niri Wayland Compositor";
     binPath = "${pkgs.niri}/bin/niri-session";
   };
 
-  services.greetd = {
+  services.displayManager.sddm = {
     enable = true;
-    settings.default_session = {
-      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd 'uwsm start niri-uwsm.desktop'";
-      user = "greeter";
-    };
+    wayland.enable = false;
   };
-  programs.regreet.enable = true;
+  services.xserver.enable = true;
 
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
 
-  # Chromium/Electron-Apps (Firefox, Discord, VS Code) nativ auf Wayland
+  # Chromium/Electron-Apps nativ auf Wayland
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  environment.variables = {
+    QT_QPA_PLATFORMTHEME = "gtk3";
+  };
+
   environment.systemPackages = with pkgs; [
-    swaylock
-    swayidle
-    rofi
+    playerctl
+    xwayland-satellite
   ];
+
+  systemd.user.services.xwayland-satellite = {
+    description = "Xwayland Satellite";
+    wantedBy = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.xwayland-satellite}/bin/xwayland-satellite :0";
+      ExecStartPost = "${pkgs.systemd}/bin/systemctl --user set-environment DISPLAY=:0";
+      Restart = "on-failure";
+    };
+  };
 
   xdg.portal = {
     enable = true;

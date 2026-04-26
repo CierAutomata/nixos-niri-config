@@ -1,4 +1,4 @@
-{ ... }:
+{ config, lib, pkgs, modulesPath, ...  }:
 {
   # Beispiel: persistenter Daten-Mount der nach Neuinstallation erhalten bleibt
   # fileSystems."/data" = {

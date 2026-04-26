@@ -17,8 +17,11 @@
     silentSDDM = {
       url = "github:uiriansan/SilentSDDM";
       inputs.nixpkgs.follows = "nixpkgs";
-   
-};
+    };
+    rose-pine-grub = {
+      url = "github:rose-pine/grub";
+      flake = false;
+    };
   };
 
   outputs = inputs@{ flake-parts, ... }:

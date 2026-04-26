@@ -39,7 +39,16 @@ in
     remmina
     freerdp
     nwg-displays
+    cava
   ];
+
+  xdg.configFile."hypr-host.conf".text = ''
+    source = ${dot}/hypr/hosts/${osConfig.networking.hostName}.conf
+  '';
+
+  xdg.configFile."niri-host.kdl".text = ''
+    include "${dot}/niri/hosts/${osConfig.networking.hostName}.kdl"
+  '';
 
   xdg.configFile = {
     "hypr".source = config.lib.file.mkOutOfStoreSymlink (dot + "/hypr/");
@@ -55,6 +64,17 @@ in
   home.file = {
     ".bashrc".source = config.lib.file.mkOutOfStoreSymlink (dot + "/.bashrc");
   };
+  # Override Steam's desktop entry to neutralize the global GDK scaling vars
+  # (GDK_SCALE=2/GDK_DPI_SCALE=0.75 are tuned for DP-3 at 1.5x; Steam runs on HDMI-A-4 at 1.0x)
+  xdg.desktopEntries.steam = {
+    name = "Steam";
+    exec = "env GDK_SCALE=1 GDK_DPI_SCALE=1 STEAM_FORCE_DESKTOPUI_SCALING=1 steam %U";
+    icon = "steam";
+    type = "Application";
+    categories = [ "Network" "FileTransfer" "Game" ];
+    mimeType = [ "x-scheme-handler/steam" "x-scheme-handler/steamlink" ];
+  };
+
   programs.git = {
     enable = true;
     settings.user.name = "CierAutomata";
