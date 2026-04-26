@@ -40,6 +40,7 @@ in
     freerdp
     nwg-displays
     cava
+    theclicker
   ];
 
   xdg.configFile."hypr-host.conf".text = ''
