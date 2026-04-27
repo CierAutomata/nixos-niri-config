@@ -19,8 +19,13 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
+      - name: Create stub hardware-configuration.nix for CI
+        run: |
+          sudo mkdir -p /etc/nixos
+          printf '{ ... }: {}\n' | sudo tee /etc/nixos/hardware-configuration.nix
+
       - name: Check flake evaluates
-        run: nix flake check --no-build
+        run: nix flake check --no-build --impure
 
   shellcheck:
     name: shellcheck bootstrap.sh
@@ -32,4 +37,4 @@ jobs:
         uses: ludeeus/action-shellcheck@2.0.0
         with:
           scandir: "."
-          severity: warning
+          severity: error
