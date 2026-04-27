@@ -14,8 +14,8 @@ let
     ../modules/tools.nix
     ../modules/desktop.nix
     ../modules/laptop.nix
-    ../modules/WM/hyprland.nix
-    ../modules/WM/niri.nix
+    ../modules/wm/hyprland.nix
+    ../modules/wm/niri.nix
     #../modules/sops.nix
     ../modules/silent-sddm.nix
   ];
