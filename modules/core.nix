@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   networking.networkmanager.enable = true;
@@ -39,6 +39,20 @@
     VISUAL = "nvim";
     SUDO_EDITOR = "nvim";
     TERMINAL = "alacritty";
-    XDG_TERMINA_EXEC = "alacritty";
+    XDG_TERMINAL_EXEC = "alacritty";
+  };
+
+  console.keyMap = config.myConfig.keyboard;
+  services.xserver.xkb = {
+    layout = config.myConfig.keyboard;
+    variant = "";
+  };
+
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
   };
 }

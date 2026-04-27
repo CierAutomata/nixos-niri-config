@@ -18,6 +18,7 @@ let
     ../modules/wm/niri.nix
     #../modules/sops.nix
     ../modules/silent-sddm.nix
+    ../modules/gaming.nix
   ];
 in
 {

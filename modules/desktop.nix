@@ -3,14 +3,21 @@
 {
   programs.uwsm.enable = config.myConfig.wm != "none";
 
-  # Systemweite Grundpakete für Desktop-Nutzung
-  environment.systemPackages = with pkgs; [
-    #greetd.tuigreet
-    #yazi
-    #udiskie
-    #xdg-utils
-    #nautilus
-  ] ++ config.myConfig.extraSystemPackages;
+  systemd.user.services.polkit-agent = lib.mkIf (config.myConfig.wm != "none") {
+    description = "Polkit Authentication Agent";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 1;
+      TimeoutStopSec = 10;
+    };
+  };
+
+  environment.systemPackages = config.myConfig.extraSystemPackages;
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     nerd-fonts.symbols-only

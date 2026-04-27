@@ -177,6 +177,10 @@
                     "unreadBadgeColor": "primary"
                 },
                 {
+                    "iconColor": "none",
+                    "id": "PowerProfile"
+                },
+                {
                     "deviceNativePath": "__default__",
                     "displayMode": "graphic-clean",
                     "hideIfIdle": false,

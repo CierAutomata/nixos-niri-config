@@ -12,6 +12,8 @@
     wm = "hyprland";
     isLaptop = true;
     userName = "cier";
+    sddmTheme = "default";
+    keyboard = "us";
     # configDir = "/home/cier/nixos-config"; # Standard, nur ändern wenn Repo woanders liegt
   };
 
@@ -32,9 +34,4 @@
   system.stateVersion = "26.05";
   hardware.bluetooth.enable = true;
 
-  console.keyMap = "en";
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
 }

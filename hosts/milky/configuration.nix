@@ -12,6 +12,9 @@
     wm = "hyprland";
     isLaptop = false;
     userName = "cier";
+    sddmTheme = "rei";
+    keyboard = "de";
+    gaming = true;
     # configDir = "/home/cier/nixos-config"; # Standard, nur ändern wenn Repo woanders liegt
   };
 
@@ -31,25 +34,4 @@
   #users.mutableUsers = false;
   system.stateVersion = "26.05";
 
-  security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
-  programs.java.enable = true; 
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
-    extraPackages = [ pkgs.jdk];
-    gamescopeSession.enable = true;
-  };
-  console.keyMap = "de";
-  services.xserver.xkb = {
-    layout = "de";
-    variant = "";
-  };
 }

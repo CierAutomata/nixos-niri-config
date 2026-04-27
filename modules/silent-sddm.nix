@@ -1,11 +1,8 @@
-{
-  inputs,
-  ...
-}: {
+{ inputs, config, ... }: {
     imports = [inputs.silentSDDM.nixosModules.default];
     programs.silentSDDM = {
         enable = true;
-        theme = "rei";
+        theme = config.myConfig.sddmTheme;
         # settings = { ... }; see example in module
     };
 }
