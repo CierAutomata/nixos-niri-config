@@ -1,10 +1,13 @@
 { config, pkgs, ... }:
 
-let dot = "/home/briest/nixos-config/dotfiles"; in
+let
+  user = builtins.getEnv "USER";
+  dot  = "/home/${user}/nixos-config/dotfiles";
+in
 {
   home.stateVersion = "26.05";
-  home.username = "briest";
-  home.homeDirectory = "/home/briest";
+  home.username = user;
+  home.homeDirectory = "/home/${user}";
 
   xdg.configFile = {
     "alacritty".source  = config.lib.file.mkOutOfStoreSymlink (dot + "/alacritty/");
