@@ -40,6 +40,7 @@
     SUDO_EDITOR = "nvim";
     TERMINAL = "kitty";
     XDG_TERMINAL_EXEC = "kitty";
+    QEMU_AUDIO_DRV = "pipewire";
   };
 
   console.keyMap = config.myConfig.keyboard;

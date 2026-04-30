@@ -49,6 +49,8 @@ in
     timeshift
     btop
     cmatrix
+    rustc
+    cargo
   ];
 
   xdg.configFile."hypr-host.conf".text = ''

@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "mPrimary": "#cfbdff",
   "mOnPrimary": "#371e73",
 
@@ -7,10 +8,21 @@
 
   "mTertiary": "#efb8c8",
   "mOnTertiary": "#492532",
+=======
+  "mPrimary": "#ffb1c4",
+  "mOnPrimary": "#5e112e",
+
+  "mSecondary": "#e3bdc5",
+  "mOnSecondary": "#422930",
+
+  "mTertiary": "#edbd92",
+  "mOnTertiary": "#472a0a",
+>>>>>>> a0c63df (ganz viel bastelei)
 
   "mError": "#ffb4ab",
   "mOnError": "#690005",
 
+<<<<<<< HEAD
   "mSurface": "#141316",
   "mOnSurface": "#e6e1e6",
 
@@ -22,4 +34,17 @@
 
   "mHover": "#efb8c8",
   "mOnHover": "#492532"
+=======
+  "mSurface": "#171213",
+  "mOnSurface": "#ece0e1",
+
+  "mSurfaceVariant": "#241e1f",
+  "mOnSurfaceVariant": "#d6c2c5",
+  
+  "mOutline": "#514346",
+  "mShadow": "#000000",
+
+  "mHover": "#edbd92",
+  "mOnHover": "#472a0a"
+>>>>>>> a0c63df (ganz viel bastelei)
 } 

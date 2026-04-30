@@ -672,6 +672,10 @@
             {
                 "enabled": true,
                 "id": "btop"
+            },
+            {
+                "enabled": true,
+                "id": "niri"
             }
         ],
         "enableUserTheming": false
@@ -692,7 +696,7 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/briest/Pictures/Wallpapers",
+        "directory": "/home/cier/Pictures/Wallpapers",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [
