@@ -40,12 +40,6 @@ in
   home.file.".bashrc".source =
     config.lib.file.mkOutOfStoreSymlink (dot + "/.bashrc");
 
-  # UWSM setzt diese Vars vor Hyprland-Start (Aquamarine DRM-Renderer crasht sonst in QEMU)
-  home.file.".config/uwsm/env-hyprland".text = ''
-    LIBGL_ALWAYS_SOFTWARE=1
-    WLR_RENDERER_ALLOW_SOFTWARE=1
-  '';
-
   programs.git = {
     enable = true;
     settings.user.name = "CierAutomata";

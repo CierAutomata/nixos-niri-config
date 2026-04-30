@@ -78,15 +78,10 @@ sudo dnf install -y brave-browser
 # --- SELinux deaktivieren ---
 sudo sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 
-# --- SDDM aktivieren + hyprland-uwsm.desktop als Default-Session ---
-# hyprland-uwsm.desktop ruft uwsm start direkt auf; hyprland.desktop (nur Exec=Hyprland)
-# funktioniert nicht, weil pam_uwsm.so nicht in SDDM-PAM ist und libseat-logind scheitert.
+# --- SDDM aktivieren + auf Xorg setzen ---
 sudo mkdir -p /etc/sddm.conf.d
-printf '[General]\nDisplayServer=x11\nSession=hyprland-uwsm.desktop\n\n[Users]\nMinimumUid=1000\nMaximumUid=29999\n' | sudo tee /etc/sddm.conf.d/10-display-server.conf
-# GDM deaktivieren falls vorhanden (blockiert sonst SDDM)
-sudo systemctl disable gdm 2>/dev/null || true
+printf '[General]\nDisplayServer=x11\n\n[Users]\nMinimumUid=1000\nMaximumUid=29999\n' | sudo tee /etc/sddm.conf.d/10-display-server.conf
 sudo systemctl enable sddm
-sudo systemctl set-default graphical.target
 
 # --- Nix installieren (Determinate Systems) ---
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
@@ -98,10 +93,6 @@ git clone https://github.com/CierAutomata/nixos-config.git ~/nixos-config
 # --- home-manager anwenden ---
 rm -f ~/.bashrc
 nix run home-manager -- switch --flake ~/nixos-config#fedora --impure
-
-# --- UWSM-Env für Hyprland in QEMU-VMs (DRM EGL-Renderer crasht ohne Software-Fallback) ---
-mkdir -p ~/.config/uwsm
-printf 'LIBGL_ALWAYS_SOFTWARE=1\nWLR_RENDERER_ALLOW_SOFTWARE=1\n' > ~/.config/uwsm/env-hyprland
 
 # --- fish als Standard-Shell setzen ---
 chsh -s /usr/bin/fish
