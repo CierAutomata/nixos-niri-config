@@ -21,7 +21,7 @@ lib.mkIf (config.myConfig.wm == "hyprland") {
     waybar
     hyprpaper
     hyprlock
-    rofi
+    wofi
   ];
 
   xdg.portal = {

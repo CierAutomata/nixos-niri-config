@@ -30,6 +30,8 @@ in
     udiskie
     xdg-utils
     perlPackages.FileMimeInfo
+    lua51Packages.luarocks-nix
+    lua51Packages.lua
     rclone
     nautilus
     kdePackages.dolphin
@@ -53,6 +55,7 @@ in
     cmatrix
     rustc
     cargo
+    wofi
   ];
 
   xdg.configFile."hypr-host.conf".text = ''
